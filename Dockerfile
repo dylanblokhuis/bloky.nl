@@ -10,7 +10,7 @@ RUN zig build -Doptimize=ReleaseFast
 
 EXPOSE 3000
 
-FROM alpine:latest
+FROM scratch
 
 WORKDIR /app
 
