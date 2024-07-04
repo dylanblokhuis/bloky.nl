@@ -26,7 +26,7 @@ pub fn main() !void {
     const addr = try net.Address.parseIp4("0.0.0.0", port);
     var socket = try xev.TCP.init(addr);
 
-    std.log.info("Listening on port {}", .{port});
+    std.debug.print("Listening on port http://localhost:{}\n", .{port});
 
     try socket.bind(addr);
     try socket.listen(std.os.linux.SOMAXCONN);
@@ -67,7 +67,6 @@ pub fn Router(comptime routes: anytype) type {
 }
 
 const Client = struct {
-    id: u32,
     socket: xev.TCP,
     loop: *xev.Loop,
     arena: std.heap.ArenaAllocator,
@@ -105,13 +104,15 @@ const Client = struct {
             const httpNotFound =
                 \\HTTP/1.1 404 Not Found
                 \\Content-Type: text/plain
-                \\Content-Length: 0
+                \\Content-Length: {d}
                 \\Connection: close
                 \\
-                \\
+                \\{s}
             ;
 
-            const res = std.fmt.allocPrint(self.arena.allocator(), httpNotFound, .{}) catch unreachable;
+            const content_not_found = "Not Found";
+            const res = std.fmt.allocPrint(self.arena.allocator(), httpNotFound, .{ content_not_found.len, content_not_found }) catch unreachable;
+
             self.socket.write(self.loop, c, .{ .slice = res }, Client, self, writeCallback);
             return .disarm;
         }
@@ -195,7 +196,6 @@ const Routes = struct {
 
         pub fn handle(s: @This()) []const u8 {
             _ = s; // autofix
-            std.debug.print("Yo!\n", .{});
             return "Yo!";
         }
     };
@@ -205,7 +205,6 @@ const Routes = struct {
 
         pub fn handle(s: @This()) []const u8 {
             _ = s; // autofix
-            std.debug.print("Yo!!!!!\n", .{});
             return "Yo!!!!!";
         }
     };
@@ -221,7 +220,6 @@ const Server = struct {
     gpa: Allocator,
     completion_pool: *CompletionPool,
     client_pool: *ClientPool,
-    conns: u32 = 0,
     // router: Router(Routes) = .{},
 
     fn acceptCallback(
@@ -234,7 +232,6 @@ const Server = struct {
         const self = self_.?;
         var client = self.client_pool.create() catch unreachable;
         client.* = Client{
-            .id = self.conns,
             .loop = l,
             .socket = r catch unreachable,
             .arena = std.heap.ArenaAllocator.init(self.gpa),
@@ -242,8 +239,6 @@ const Server = struct {
             .completion_pool = self.completion_pool,
         };
         client.work();
-
-        self.conns += 1;
 
         return .rearm;
     }
