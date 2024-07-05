@@ -1,11 +1,16 @@
 const std = @import("std");
 const xev = @import("xev");
+const log = std.log.scoped(.srv);
 
 const net = std.net;
 const Allocator = std.mem.Allocator;
 
 const CompletionPool = std.heap.MemoryPoolExtra(xev.Completion, .{});
 const ClientPool = std.heap.MemoryPoolExtra(Client, .{});
+
+pub const std_options: std.Options = .{
+    .log_level = .info,
+};
 
 pub fn main() !void {
     var thread_pool = xev.ThreadPool.init(.{});
@@ -26,7 +31,7 @@ pub fn main() !void {
     const addr = try net.Address.parseIp4("0.0.0.0", port);
     var socket = try xev.TCP.init(addr);
 
-    std.debug.print("Listening on port http://localhost:{}\n", .{port});
+    log.info("Listening on port http://localhost:{}", .{port});
 
     try socket.bind(addr);
     try socket.listen(std.os.linux.SOMAXCONN);
@@ -52,6 +57,7 @@ pub fn main() !void {
 pub fn Router(comptime routes: anytype) type {
     return struct {
         pub fn call(self: @This(), method: std.http.Method, path: []const u8) ?[]const u8 {
+            log.info("{d} - {s} - {s}", .{ std.time.timestamp(), @tagName(method), path });
 
             // std.meta.decl
             _ = self;
@@ -91,13 +97,24 @@ const Client = struct {
     ) xev.CallbackAction {
         const self = self_.?;
         const n = r catch |err| {
-            std.log.err("read error {any}", .{err});
+            log.err("read error {any}", .{err});
             s.shutdown(l, c, Client, self, shutdownCallback);
             return .disarm;
         };
         const data = buf.slice[0..n];
 
         const head = std.http.Server.Request.Head.parse(data) catch unreachable;
+        // var header = std.http.HeaderIterator.init(data);
+
+        // // while (header.next()) |field| {
+        // //     const name = field.name;
+        // //     const value = field.value;
+        // //     std.debug.print("Header: {s} = {s}\n", .{ name, value });
+        // //     if (std.mem.eql(u8, name, "Host") and std.mem.eql(u8, value, "localhost:3000")) {
+        // //         std.debug.print("Host header found\n", .{});
+        // //     }
+        // // }
+
         const content = router.call(head.method, head.target);
 
         if (content == null) {
