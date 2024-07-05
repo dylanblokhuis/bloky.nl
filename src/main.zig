@@ -228,7 +228,7 @@ const Routes = struct {
         }
     };
 
-    const letsencrypt = struct {
+    const letsencrypt1 = struct {
         method: std.http.Method = .GET,
         path: []const u8 = "/.well-known/acme-challenge/pgz95_WmAiaVhol41ObwEjxDCRFT7vyzBVS1CBtHCB4",
         pub fn handle(s: @This()) []const u8 {
@@ -236,12 +236,22 @@ const Routes = struct {
             return "pgz95_WmAiaVhol41ObwEjxDCRFT7vyzBVS1CBtHCB4.EQ06WqS-uKI-jyWBTl2-vYAU-YaQdq9c13R_S1PUilw";
         }
     };
+
+    const letsencrypt2 = struct {
+        method: std.http.Method = .GET,
+        path: []const u8 = "/.well-known/acme-challenge/OSjoTFqRar-dGazpYkOcUwKbE7BNZRdlShb4BFDLyqE",
+        pub fn handle(s: @This()) []const u8 {
+            _ = s; // autofix
+            return "OSjoTFqRar-dGazpYkOcUwKbE7BNZRdlShb4BFDLyqE.EQ06WqS-uKI-jyWBTl2-vYAU-YaQdq9c13R_S1PUilw";
+        }
+    };
 };
 
 const router = Router(&.{
     Routes.yo{},
     Routes.yo2{},
-    Routes.letsencrypt{},
+    Routes.letsencrypt1{},
+    Routes.letsencrypt2{},
 }){};
 
 const Server = struct {
