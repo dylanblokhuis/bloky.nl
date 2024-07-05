@@ -1,5 +1,7 @@
 const std = @import("std");
 const xev = @import("xev");
+const tls = @import("tls");
+
 const log = std.log.scoped(.srv);
 
 const net = std.net;
@@ -225,11 +227,21 @@ const Routes = struct {
             return "Yo!!!!!";
         }
     };
+
+    const letsencrypt = struct {
+        method: std.http.Method = .GET,
+        path: []const u8 = "/.well-known/acme-challenge/pgz95_WmAiaVhol41ObwEjxDCRFT7vyzBVS1CBtHCB4",
+        pub fn handle(s: @This()) []const u8 {
+            _ = s; // autofix
+            return "pgz95_WmAiaVhol41ObwEjxDCRFT7vyzBVS1CBtHCB4.EQ06WqS-uKI-jyWBTl2-vYAU-YaQdq9c13R_S1PUilw";
+        }
+    };
 };
 
 const router = Router(&.{
     Routes.yo{},
     Routes.yo2{},
+    Routes.letsencrypt{},
 }){};
 
 const Server = struct {
