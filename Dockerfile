@@ -8,13 +8,13 @@ COPY src src
 
 RUN zig build -Doptimize=ReleaseFast
 
-EXPOSE 3000
-
 FROM scratch
 
+EXPOSE 3000
 WORKDIR /app
 
 COPY --from=builder /app/zig-out/bin/bloky.nl .
+COPY --from=builder /app/public public
 
 CMD ["./bloky.nl"]
 

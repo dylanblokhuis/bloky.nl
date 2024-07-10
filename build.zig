@@ -22,17 +22,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const xev = b.dependency("xev", .{
+    const zap = b.dependency("zap", .{
         .target = target,
         .optimize = optimize,
+        // .openssl = true,
     });
-    exe.root_module.addImport("xev", xev.module("xev"));
-
-    const tls = b.dependency("tls", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.root_module.addImport("tls", tls.module("tls"));
+    exe.root_module.addImport("zap", zap.module("zap"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

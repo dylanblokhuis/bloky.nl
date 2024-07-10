@@ -23,13 +23,9 @@
     // Once all dependencies are fetched, `zig build` no longer requires
     // internet connectivity.
     .dependencies = .{
-        .xev = .{
-            .url = "https://github.com/mitchellh/libxev/archive/1dd3c9015a542757b049f6d33beb8941f57bce1f.tar.gz",
-            .hash = "1220b644b45718a869b37bc37bbc476e69922b21090003b38c1b68a7218fc365771a",
-        },
-        .tls = .{
-            .url = "https://github.com/ianic/tls.zig/archive/0623c9b856f1eb39e4fdbe3be0cb1dc69d57d3a1.tar.gz",
-            .hash = "1220764f8f8642ac039a20409eb7cb7005b8836f6b4e06a13e7dc2df7cf6ccff2e15",
+        .zap = .{
+            .url = "https://github.com/zigzap/zap/archive/4868cdcb17dbd34e1c5c3fa997adada98a8e1c57.tar.gz",
+            .hash = "12209936c3333b53b53edcf453b1670babb9ae8c2197b1ca627c01e72670e20c1a21",
         },
     },
     .paths = .{
