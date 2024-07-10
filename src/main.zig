@@ -48,6 +48,6 @@ pub fn main() !void {
     // start worker threads
     zap.start(.{
         .threads = @intCast(try std.Thread.getCpuCount()),
-        .workers = @intCast(try std.Thread.getCpuCount()),
+        .workers = 1,
     });
 }
