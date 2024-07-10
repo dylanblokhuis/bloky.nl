@@ -8,17 +8,16 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: multiple command
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Deploy to server
-        run: |
-          ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} <<'ENDSSH'
-          cd ${{ secrets.SSH_APP_PATH }}
-          git pull
-          docker build -t bloky.nl .
-          docker kill bloky.nl
-          docker rm bloky.nl
-          docker run --restart unless-stopped --name bloky.nl -p 3000:3000 -d bloky.nl                  
-          ENDSSH
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SSH_APP_PATH }}
+            git pull
+            docker build -t bloky.nl .
+            docker kill bloky.nl
+            docker rm bloky.nl
+            docker run --restart unless-stopped --name bloky.nl -p 3000:3000 -d bloky.nl
