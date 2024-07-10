@@ -1,4 +1,9 @@
- jobs:
+on:
+  push:
+    branches:
+      - master
+
+jobs:
   deploy:
     name: Deploy
     steps:
