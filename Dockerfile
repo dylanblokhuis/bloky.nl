@@ -5,6 +5,7 @@ WORKDIR /app
 COPY build.zig .
 COPY build.zig.zon .
 COPY src src
+COPY public public
 
 RUN zig build -Doptimize=ReleaseFast
 
