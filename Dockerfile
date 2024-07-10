@@ -9,7 +9,7 @@ COPY public public
 
 RUN zig build -Doptimize=ReleaseFast
 
-FROM scratch
+FROM alpine:3.20.1
 
 EXPOSE 3000
 WORKDIR /app
