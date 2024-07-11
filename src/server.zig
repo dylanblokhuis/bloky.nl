@@ -119,18 +119,18 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
                 // std.meta.decl
                 inline for (routes) |route| {
                     if (route.method == method and std.mem.eql(u8, route.path, path)) {
-                        return try route.handle(self.allocator(), self.server.state);
+                        return try @TypeOf(route).handle(path, self.allocator(), self.server.state);
+                    }
+
+                    if (route.method == method and std.mem.eql(u8, route.path, "*")) {
+                        return try @TypeOf(route).handle(path, self.allocator(), self.server.state);
                     }
                 }
 
                 return null;
             }
 
-            pub fn onRead(self_: ?*Client, l: *xev.Loop, c: *xev.Completion, s: xev.TCP, buf: xev.ReadBuffer, r: xev.TCP.ReadError!usize) xev.CallbackAction {
-                _ = l; // autofix
-                _ = c; // autofix
-                _ = s; // autofix
-                _ = buf; // autofix
+            pub fn onRead(self_: ?*Client, _: *xev.Loop, _: *xev.Completion, _: xev.TCP, _: xev.ReadBuffer, r: xev.TCP.ReadError!usize) xev.CallbackAction {
                 const self = self_.?;
                 const bytes_read = r catch @panic("read error");
                 const data = self.head_buf[0..bytes_read];
