@@ -23,9 +23,13 @@
     // Once all dependencies are fetched, `zig build` no longer requires
     // internet connectivity.
     .dependencies = .{
-        .zap = .{
-            .url = "https://github.com/zigzap/zap/archive/4868cdcb17dbd34e1c5c3fa997adada98a8e1c57.tar.gz",
-            .hash = "12209936c3333b53b53edcf453b1670babb9ae8c2197b1ca627c01e72670e20c1a21",
+        .quickjs = .{
+            .url = "https://github.com/quickjs-ng/quickjs/archive/b071d36ab561a85fad11f487f875aba2d25b5ccd.tar.gz",
+            .hash = "12205dcb914169c97085fe7355607355261ba008302eb8145f844187ab3cfec8f5af",
+        },
+        .xev = .{
+            .url = "https://github.com/mitchellh/libxev/archive/1dd3c9015a542757b049f6d33beb8941f57bce1f.tar.gz",
+            .hash = "1220b644b45718a869b37bc37bbc476e69922b21090003b38c1b68a7218fc365771a",
         },
     },
     .paths = .{

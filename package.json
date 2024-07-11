@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build-polyfills": "esbuild ./src/polyfills/*.js --target=esnext --format=iife --bundle --platform=browser --outfile=polyfills.js",
+    "build-server": "esbuild ./src/frontend/entry.server.tsx --target=esnext --format=iife --bundle --platform=browser --outfile=out.js",
+    "build": "run-s build-*"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "text-encoding-utf-8": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.23.0",
+    "npm-run-all": "^4.1.5"
+  }
+}

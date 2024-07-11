@@ -22,12 +22,30 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const zap = b.dependency("zap", .{
+    const xev = b.dependency("xev", .{
         .target = target,
         .optimize = optimize,
-        // .openssl = true,
     });
-    exe.root_module.addImport("zap", zap.module("zap"));
+    exe.root_module.addImport("xev", xev.module("xev"));
+
+    const dep = b.dependency("quickjs", .{});
+    exe.linkLibC();
+    exe.addCSourceFiles(.{
+        .root = dep.path(""),
+        .files = &.{
+            "cutils.c",
+            "libbf.c",
+            "libunicode.c",
+            // "quickjs-libc.c",
+            "quickjs.c",
+            "libregexp.c",
+        },
+        .flags = &.{
+            "-Wall",
+            "-D_GNU_SOURCE",
+        },
+    });
+    exe.addIncludePath(dep.path(""));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

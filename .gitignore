@@ -1,4 +1,4 @@
 /.vscode
 /.zig-cache
 /zig-out
-/certs
+/node_modules
