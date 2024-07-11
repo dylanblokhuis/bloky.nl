@@ -11,6 +11,16 @@ const Routes = struct {
             return js.call([]const u8, "onRequest", s.path);
         }
     };
+    const health = struct {
+        method: std.http.Method = .GET,
+        path: []const u8 = "/health",
+
+        pub fn handle(s: @This(), js: *JS) ![]const u8 {
+            _ = s; // autofix
+            _ = js; // autofix
+            return "OK";
+        }
+    };
 };
 
 var rt: JS = undefined;
