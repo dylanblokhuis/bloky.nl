@@ -2,10 +2,14 @@ FROM kassany/alpine-ziglang:0.13.0 as builder
 
 WORKDIR /app
 
+USER root
+
 COPY build.zig .
 COPY build.zig.zon .
 COPY src src
 COPY public public
+COPY package.json .
+COPY package-lock.json .
 
 RUN apk add --update nodejs npm
 
