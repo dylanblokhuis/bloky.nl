@@ -297,13 +297,18 @@ pub fn garbageCollection(self: *Self) void {
     c.JS_RunGC(self.rt);
 }
 
-pub fn call(self: *Self, T: type, func_name: [:0]const u8, arg: anytype) !T {
-    const func_obj = c.JS_GetPropertyStr(self.ctx, c.JS_GetGlobalObject(self.ctx), func_name.ptr);
-    var arg_val = try JS.serialize(self.ctx, self.gpa, arg);
+pub fn call(self: *Self, T: type, allocator: std.mem.Allocator, func_name: [:0]const u8, arg: anytype) !T {
+    const global = c.JS_GetGlobalObject(self.ctx);
+    const func_obj = c.JS_GetPropertyStr(self.ctx, global, func_name.ptr);
+    var arg_val = try JS.serialize(self.ctx, allocator, arg);
+    defer c.JS_FreeValue(self.ctx, arg_val);
+
     // const str = c.JS_ToCString(self.ctx, value);
     // defer c.JS_FreeCString(self.ctx, str);
     // std.debug.print("{s}\n", .{str});
     // return func;
-    const value = c.JS_Call(self.ctx, func_obj, c.JS_GetGlobalObject(self.ctx), 1, &arg_val);
-    return try JS.deserialize(T, self.ctx, self.gpa, value);
+    const value = c.JS_Call(self.ctx, func_obj, global, 1, &arg_val);
+    defer c.JS_FreeValue(self.ctx, value);
+
+    return try JS.deserialize(T, self.ctx, allocator, value);
 }

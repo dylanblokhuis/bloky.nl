@@ -7,15 +7,16 @@ const Routes = struct {
         method: std.http.Method = .GET,
         path: []const u8 = "/",
 
-        pub fn handle(s: @This(), js: *JS) ![]const u8 {
-            return js.call([]const u8, "onRequest", s.path);
+        pub fn handle(s: @This(), allocator: std.mem.Allocator, js: *JS) ![]const u8 {
+            return js.call([]const u8, allocator, "onRequest", s.path);
         }
     };
     const health = struct {
         method: std.http.Method = .GET,
         path: []const u8 = "/health",
 
-        pub fn handle(s: @This(), js: *JS) ![]const u8 {
+        pub fn handle(s: @This(), allocator: std.mem.Allocator, js: *JS) ![]const u8 {
+            _ = allocator; // autofix
             _ = s; // autofix
             _ = js; // autofix
             return "OK";

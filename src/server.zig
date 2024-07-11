@@ -54,20 +54,6 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
             return .rearm;
         }
 
-        pub fn call(self: *Self, method: std.http.Method, path: []const u8, state: *State) !?[]const u8 {
-            std.log.info("{d} - {s} - {s}", .{ std.time.timestamp(), @tagName(method), path });
-
-            // std.meta.decl
-            _ = self;
-            inline for (routes) |route| {
-                if (route.method == method and std.mem.eql(u8, route.path, path)) {
-                    return try route.handle(state);
-                }
-            }
-
-            return null;
-        }
-
         pub const SpawnOptions = struct {
             repeat: bool = false,
             timeout_in_ms: usize = 0,
@@ -118,7 +104,7 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
             completion: *xev.Completion,
             head_buf: [4096]u8 = undefined,
 
-            pub fn allocator(self: *Client) std.mem.Allocator {
+            pub inline fn allocator(self: *Client) std.mem.Allocator {
                 return self.arena.allocator();
             }
 
@@ -126,6 +112,19 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
                 self.arena.deinit();
                 self.server.completions.destroy(self.completion);
                 self.server.clients.destroy(self);
+            }
+
+            pub fn call(self: *Client, method: std.http.Method, path: []const u8) !?[]const u8 {
+                std.log.info("{d} - {s} - {s}", .{ std.time.timestamp(), @tagName(method), path });
+
+                // std.meta.decl
+                inline for (routes) |route| {
+                    if (route.method == method and std.mem.eql(u8, route.path, path)) {
+                        return try route.handle(self.allocator(), self.server.state);
+                    }
+                }
+
+                return null;
             }
 
             pub fn onRead(self_: ?*Client, l: *xev.Loop, c: *xev.Completion, s: xev.TCP, buf: xev.ReadBuffer, r: xev.TCP.ReadError!usize) xev.CallbackAction {
@@ -138,7 +137,7 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
                 const data = self.head_buf[0..bytes_read];
                 const head = std.http.Server.Request.Head.parse(data) catch unreachable;
 
-                if (self.server.call(head.method, head.target, self.server.state) catch @panic("TODO: add proper res")) |content| {
+                if (self.call(head.method, head.target) catch @panic("TODO: add proper res")) |content| {
                     self.writeHtml("200 OK", content) catch @panic("write error");
                     return .disarm;
                 }
