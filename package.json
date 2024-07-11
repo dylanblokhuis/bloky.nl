@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "build-polyfills": "esbuild ./src/polyfills/*.js --target=esnext --format=iife --bundle --platform=browser --outfile=zig-out/polyfills.js",
-    "build-server": "esbuild ./src/frontend/entry.server.tsx --target=esnext --format=iife --bundle --platform=browser --outfile=zig-out/out.js",
-    "build": "run-s build-*"
+    "build-polyfills": "esbuild ./src/polyfills/*.js --target=esnext --format=iife --bundle --platform=browser --minify --outfile=zig-out/polyfills.js",
+    "build-server": "esbuild ./src/frontend/entry.server.tsx --target=esnext --format=iife --bundle --platform=browser --minify --outfile=zig-out/server.js",
+    "build-client": "esbuild ./src/frontend/entry.client.tsx --target=esnext --format=iife --bundle --platform=browser --minify --outfile=zig-out/client.js",
+    "build": "run-p build-*"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -3,9 +3,9 @@ import App from './app';
 
 import { renderToString } from 'react-dom/server';
 
-function onRequest(path: string): string {
+function onRequest(): string {
 
-  return renderToString(<App path={path} />);
+  return `<!DOCTYPE html>${renderToString(<App />)}`;
 }
 
 globalThis.onRequest = onRequest;

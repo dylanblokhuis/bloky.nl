@@ -36,8 +36,7 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
             try self.loop.run(.until_done);
         }
 
-        fn onAccept(ud: ?*Self, l: *xev.Loop, c: *xev.Completion, r: xev.AcceptError!xev.TCP) xev.CallbackAction {
-            _ = c; // autofix
+        fn onAccept(ud: ?*Self, l: *xev.Loop, _: *xev.Completion, r: xev.AcceptError!xev.TCP) xev.CallbackAction {
             const self = ud.?;
             const client_socket = r catch @panic("accept error");
             const client_completion = self.completions.create() catch @panic("alloc completion error");
@@ -138,26 +137,29 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
                 const head = std.http.Server.Request.Head.parse(data) catch unreachable;
 
                 if (self.call(head.method, head.target) catch @panic("TODO: add proper res")) |content| {
-                    self.writeHtml("200 OK", content) catch @panic("write error");
+                    if (std.mem.containsAtLeast(u8, head.target, 1, ".js")) {
+                        self.writeHtml("200 OK", "application/javascript", content) catch @panic("write error");
+                    } else {
+                        self.writeHtml("200 OK", "text/html", content) catch @panic("write error");
+                    }
                     return .disarm;
                 }
 
-                self.writeHtml("404 Not Found", "Not Found") catch @panic("write error");
+                self.writeHtml("404 Not Found", "text/plain", "Not Found") catch @panic("write error");
 
                 return .disarm;
             }
 
-            fn writeHtml(self: *Client, status: []const u8, html: []const u8) !void {
+            fn writeHtml(self: *Client, status: []const u8, content_type: []const u8, html: []const u8) !void {
                 const httpOk =
                     \\HTTP/1.1 {s}
-                    \\Content-Type: text/html
+                    \\Content-Type: {s}
                     \\Content-Length: {d}
                     \\Connection: close
                     \\
                     \\{s}
                 ;
-
-                const response = try std.fmt.allocPrint(self.allocator(), httpOk, .{ status, html.len, html });
+                const response = try std.fmt.allocPrint(self.allocator(), httpOk, .{ status, content_type, html.len, html });
                 self.socket.write(&self.server.loop, self.completion, .{ .slice = response }, Client, self, Client.onWrite);
             }
 
@@ -169,10 +171,19 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
                 buf: xev.WriteBuffer,
                 r: xev.TCP.WriteError!usize,
             ) xev.CallbackAction {
-                _ = buf; // autofix
-                _ = r catch @panic("write error");
-
                 const self = self_.?;
+
+                const written = r catch |err| {
+                    std.log.err("write error: {}, deiniting client", .{err});
+                    self.deinit();
+                    return .disarm;
+                };
+                if (written != buf.slice.len) {
+                    self.socket.write(l, c, .{ .slice = buf.slice[written..] }, Client, self, Client.onWrite);
+
+                    return .disarm;
+                }
+
                 s.shutdown(l, c, Client, self, onShutdown);
 
                 return .disarm;
