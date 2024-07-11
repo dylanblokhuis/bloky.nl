@@ -35,8 +35,8 @@ var rt: JS = undefined;
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
     rt = JS.init(allocator);
-    try rt.run("polyfills.js");
-    try rt.run("out.js");
+    try rt.run("zig-out/polyfills.js");
+    try rt.run("zig-out/out.js");
 
     var server = try Server(JS, &.{
         Routes.yo{},

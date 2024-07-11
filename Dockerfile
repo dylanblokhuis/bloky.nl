@@ -7,6 +7,11 @@ COPY build.zig.zon .
 COPY src src
 COPY public public
 
+RUN apk add --update nodejs npm
+
+RUN npm install
+RUN npm run build
+
 RUN zig build -Doptimize=ReleaseFast
 
 FROM alpine:3.20.1
@@ -14,8 +19,8 @@ FROM alpine:3.20.1
 EXPOSE 3000
 WORKDIR /app
 
-COPY --from=builder /app/zig-out/bin/bloky.nl .
+COPY --from=builder /app/zig-out zig-out
 COPY --from=builder /app/public public
 
-CMD ["./bloky.nl"]
+CMD ["./zig-out/bin/bloky.nl"]
 

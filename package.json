@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build-polyfills": "esbuild ./src/polyfills/*.js --target=esnext --format=iife --bundle --platform=browser --outfile=polyfills.js",
-    "build-server": "esbuild ./src/frontend/entry.server.tsx --target=esnext --format=iife --bundle --platform=browser --outfile=out.js",
+    "build-polyfills": "esbuild ./src/polyfills/*.js --target=esnext --format=iife --bundle --platform=browser --outfile=zig-out/polyfills.js",
+    "build-server": "esbuild ./src/frontend/entry.server.tsx --target=esnext --format=iife --bundle --platform=browser --outfile=zig-out/out.js",
     "build": "run-s build-*"
   },
   "dependencies": {
