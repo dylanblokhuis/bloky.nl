@@ -20,4 +20,4 @@ jobs:
             docker build -t bloky.nl .
             docker kill bloky.nl
             docker rm bloky.nl
-            docker run --restart unless-stopped --name bloky.nl -p 3000:3000 -d bloky.nl
+            docker run --restart unless-stopped --name bloky.nl -p 3000:3000 -d --security-opt seccomp=unconfined bloky.nl
