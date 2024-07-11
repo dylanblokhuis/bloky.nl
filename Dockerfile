@@ -18,7 +18,7 @@ RUN npm run build
 
 RUN zig build -Doptimize=ReleaseFast
 
-FROM alpine:3.20.1
+FROM scratch
 
 EXPOSE 3000
 WORKDIR /app
