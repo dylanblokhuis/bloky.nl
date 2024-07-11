@@ -68,6 +68,49 @@ pub fn Server(comptime State: type, comptime routes: anytype) type {
             return null;
         }
 
+        pub const SpawnOptions = struct {
+            repeat: bool = false,
+            timeout_in_ms: usize = 0,
+        };
+        pub fn spawn(self: *Self, options: SpawnOptions, func: anytype, args: anytype) !void {
+            const Cb = struct {
+                outer: *Self,
+                args: @TypeOf(args),
+                func: *anyopaque,
+                options: SpawnOptions,
+
+                pub fn cb(
+                    ud: ?*anyopaque,
+                    loop: *xev.Loop,
+                    completion: *xev.Completion,
+                    _: xev.Result,
+                ) xev.CallbackAction {
+                    const callback: *@This() = @ptrCast(@alignCast(ud));
+
+                    const func_ptr: *@TypeOf(func) = @ptrCast(@alignCast(callback.func));
+                    _ = @call(.auto, func_ptr, callback.args);
+
+                    if (callback.options.repeat) {
+                        loop.timer(completion, callback.options.timeout_in_ms, callback, @This().cb);
+                    } else {
+                        callback.outer.gpa.destroy(callback);
+                        callback.outer.completions.destroy(completion);
+                    }
+
+                    return .disarm;
+                }
+            };
+
+            const ptr = try self.gpa.create(Cb);
+            ptr.* = Cb{
+                .outer = self,
+                .args = args,
+                .func = @constCast(&func),
+                .options = options,
+            };
+            const c = try self.completions.create();
+            self.loop.timer(c, options.timeout_in_ms, ptr, Cb.cb);
+        }
         const Client = struct {
             server: *Self,
             socket: xev.TCP,

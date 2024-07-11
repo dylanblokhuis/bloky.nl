@@ -293,6 +293,10 @@ pub fn run(self: *Self, script_file: [:0]const u8) !void {
     c.JS_FreeValue(self.ctx, script_result);
 }
 
+pub fn garbageCollection(self: *Self) void {
+    c.JS_RunGC(self.rt);
+}
+
 pub fn call(self: *Self, T: type, func_name: [:0]const u8, arg: anytype) !T {
     const func_obj = c.JS_GetPropertyStr(self.ctx, c.JS_GetGlobalObject(self.ctx), func_name.ptr);
     var arg_val = try JS.serialize(self.ctx, self.gpa, arg);

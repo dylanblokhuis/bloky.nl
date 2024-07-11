@@ -1,23 +1,6 @@
 const std = @import("std");
 const Server = @import("server.zig").Server;
-const Router = @import("server.zig").Router;
 const JS = @import("js.zig");
-
-fn onRequest(r: Server.Request) void {
-    _ = r; // autofix
-}
-//     const path = r.path orelse "/";
-//     std.debug.print("{s}\n", .{path});
-//     const html = rt.call([]const u8, "onRequest", path) catch {
-//         r.setStatus(.internal_server_error);
-//         r.sendBody("<html><body><h1>500 - Internal Server Error</h1></body></html>") catch return;
-//         return;
-//     };
-//     defer std.heap.c_allocator.free(html);
-
-//     r.setStatus(.ok);
-//     r.sendBody(html) catch return;
-// }
 
 const Routes = struct {
     const yo = struct {
@@ -41,6 +24,10 @@ pub fn main() !void {
     var server = try Server(JS, &.{
         Routes.yo{},
     }).init(allocator, &rt);
+    try server.spawn(.{
+        .repeat = true,
+        .timeout_in_ms = 4000,
+    }, JS.garbageCollection, .{&rt});
     try server.listen(try std.net.Address.parseIp("0.0.0.0", 3000));
 }
 
