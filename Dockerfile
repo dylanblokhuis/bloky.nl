@@ -24,7 +24,7 @@ EXPOSE 3000
 WORKDIR /app
 
 # copy libc
-COPY --from=builder /lib/ld-musl-x86_64.so.1 /lib/
+COPY --from=builder /lib/ld-musl-* /lib/
 
 COPY --from=builder /app/zig-out zig-out
 COPY --from=builder /app/public public
